@@ -1,7 +1,7 @@
 <?php
 
 	/*
-		ver. 1.0.1
+		ver. 1.0.2
 		PayU Account Payment plugin for osCommerce 2.3.1
 		
 		@license    http://opensource.org/licenses/GPL-3.0  Open Software License (GPL 3.0)
@@ -22,5 +22,3 @@
 			echo $payu_account->get_shipping_cost_recalc($result->getSessionId(), $result->getCountryCode(), $result->getReqId());
 		}
 	}
-
-?>

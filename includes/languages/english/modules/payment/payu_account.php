@@ -9,10 +9,10 @@
 		http://www.payu.com
 	*/
 
-	define('MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_TITLE', 'PayU Account');
-	define('MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_PUBLIC_TITLE', 'Payment with PayU Account (including Credit Cards)');
+	define('MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_TITLE', 'PayU account');
+	define('MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_PUBLIC_TITLE', 'Payment with PayU account (including Credit Cards)');
 	
-	define('MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_BUTTON', 'Payment with PayU Account');
+	define('MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_BUTTON', 'Payment with PayU account');
 	
 	define('MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_NO_DESCRIPTION', 'There is no description for this order.');
 	define('MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_ERROR_IN_CREATING_ORDER', 'There is an error with creating order, please try again later.');
@@ -30,5 +30,3 @@
 	define('MODULE_PAYMENT_PAYU_ACCOUNT_PAYMENT_STATUS_NOAUTH', 'No Authorization Payment');
 	define('MODULE_PAYMENT_PAYU_ACCOUNT_PAYMENT_STATUS_REJECT_DONE', 'Payment status Rejected');
 	define('MODULE_PAYMENT_PAYU_ACCOUNT_PAYMENT_STATUS_ERROR', 'Payment status Error');
-
-?>

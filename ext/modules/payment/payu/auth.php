@@ -1,7 +1,7 @@
 <?php
 
 	/*
-		ver. 1.0.1
+		ver. 1.0.2
 		PayU Account Payment plugin for osCommerce 2.3.1
 		
 		@license    http://opensource.org/licenses/GPL-3.0  Open Software License (GPL 3.0)
@@ -32,8 +32,8 @@
 
 			// if code is empty, throw Exception
 			if(empty($payu_code))
-			{
-				Throw new Exception("Error: Not set - PayU Code param"); 
+            {
+                Throw new Exception("Error: Not set - PayU Code param");
 			}
 			
 			$result = OpenPayU_OAuth::accessTokenByCode($payu_code, $url);
@@ -46,7 +46,7 @@
 			}
 			else
 			{
-				Throw new Exception("accessTokenByCode error: " . $result->getError()); 
+				Throw new Exception("accessTokenByCode error: " . $result->getError());
 			}
 		}
 		else
@@ -54,5 +54,3 @@
 			Throw new Exception("Error: Not set - sessionId"); 
 		}
 	}
-
-?>
