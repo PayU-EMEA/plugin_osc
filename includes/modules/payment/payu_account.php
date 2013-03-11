@@ -1,7 +1,7 @@
 <?php
 
 /*
-	ver. 1.0.2
+	ver. 1.0.3
 	PayU Account Payment plugin for osCommerce 2.3.1
 	
 	Copyright (c) 2012 PayU
@@ -19,12 +19,12 @@ class payu_account
     {
         global $order, $language;
 
-        $this->signature = 'payu|payu_account|1.0.2|2.3.1';
+        $this->signature = 'payu|payu_account|1.0.3|2.3.1';
 
         $this->code = 'payu_account';
         $this->title = MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_TITLE;
         $this->public_title = MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_PUBLIC_TITLE;
-        $this->description = payu_version('1.0.2', '');
+        $this->description = payu_version('1.0.3', '');
         $this->sort_order = MODULE_PAYMENT_PAYU_ACCOUNT_SORT_ORDER;
 
         $this->enabled = ((MODULE_PAYMENT_PAYU_ACCOUNT_STATUS == 'Yes') ? TRUE : FALSE);
@@ -117,7 +117,7 @@ class payu_account
             $status_id = $check['orders_status_id'];
         }
 
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_VERSION', '1.0.2', '', '6', '0', '', 'payu_version(', now())");
+        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_VERSION', '1.0.3', '', '6', '0', '', 'payu_version(', now())");
 
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable payments with PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_STATUS', 'No', 'Do you want to accept payments with PayU Account?', '6', '1', 'tep_cfg_select_option(array(\'Yes\', \'No\'), ', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Point of sale id number (POS ID)', 'MODULE_PAYMENT_PAYU_ACCOUNT_POS_ID', '', 'OAuth protocol - client_id', '6', '0', now())");
@@ -255,9 +255,6 @@ class payu_account
                 $products[$i]['ShoppingCartItem']['Product'] = array();
                 $products[$i]['ShoppingCartItem']['Product']['Name'] = $product['name'];
                 $products[$i]['ShoppingCartItem']['Product']['Code'] = $product['model'];
-
-                if(!empty($product['weight']))
-                    $products[$i]['ShoppingCartItem']['Product']['Weight'] = array('Amount' => $product['weight'] * 100, 'Unit' => 'gr');
 
                 $products[$i]['ShoppingCartItem']['Product']['Discount'] = 0;
 
@@ -416,15 +413,12 @@ class payu_account
     {
         if(!empty($this->order->customer['firstname']) && !empty($this->order->customer['lastname']))
         {
-            $language_query = tep_db_query("SELECT code FROM " . TABLE_LANGUAGES . " WHERE directory='".tep_db_input($this->language)."' ORDER BY sort_order LIMIT 1");
-            $language = tep_db_fetch_array($language_query);
-
+            if($this->order->customer['email_address'])
             $customer = array(
                 'Email' => $this->order->customer['email_address'],
                 'Phone' => $this->order->customer['telephone'],
                 'FirstName' => $this->order->customer['firstname'],
-                'LastName' => $this->order->customer['lastname'],
-                'Language' => strtoupper($language['code'])
+                'LastName' => $this->order->customer['lastname']
             );
 
             if(!empty($this->order->delivery['street_address']))
@@ -502,9 +496,7 @@ class payu_account
                     'CurrencyCode' => $this->order->info['currency'],
                     'ShoppingCartItems' => $shopping_cart
                 ),
-                'MerchantAuthorizationKey' => OpenPayU_Configuration::getPosAuthKey(),
-                'SignatureTimestamp' => $_SERVER['REQUEST_TIME'],
-                'Signature' => $this->signature
+                'MerchantAuthorizationKey' => OpenPayU_Configuration::getPosAuthKey()
             )
         );
 
