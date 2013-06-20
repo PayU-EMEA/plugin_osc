@@ -1,3 +1,7 @@
+## 1.0.4
+
+* Removed code value of product
+
 ## 1.0.3
 
 * Removed weight value of product
