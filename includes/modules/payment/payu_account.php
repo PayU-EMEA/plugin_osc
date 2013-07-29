@@ -1,11 +1,11 @@
 <?php
 
 /*
-	ver. 1.0.4
-	PayU Account Payment plugin for osCommerce 2.3.1
-	
-	Copyright (c) 2012 PayU
-	http://www.payu.com
+    ver. 1.0.5
+    PayU Account Payment plugin for osCommerce 2.3.1
+
+    Copyright (c) 2012 PayU
+    http://www.payu.com
 */
 
 require_once 'payu/openpayu.php';
@@ -19,12 +19,12 @@ class payu_account
     {
         global $order, $language;
 
-        $this->signature = 'payu|payu_account|1.0.4|2.3.1';
+        $this->signature = 'payu|payu_account|1.0.5|2.3.1';
 
         $this->code = 'payu_account';
         $this->title = MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_TITLE;
         $this->public_title = MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_PUBLIC_TITLE;
-        $this->description = payu_version('1.0.4', '');
+        $this->description = payu_version('1.0.5', '');
         $this->sort_order = MODULE_PAYMENT_PAYU_ACCOUNT_SORT_ORDER;
 
         $this->enabled = ((MODULE_PAYMENT_PAYU_ACCOUNT_STATUS == 'Yes') ? TRUE : FALSE);
@@ -37,8 +37,7 @@ class payu_account
         OpenPayU_Configuration::setClientSecret(MODULE_PAYMENT_PAYU_ACCOUNT_CLIENT_SECRET);
         OpenPayU_Configuration::setSignatureKey(MODULE_PAYMENT_PAYU_ACCOUNT_SIGN_KEY);
 
-        if ((int)MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID > 0)
-        {
+        if ((int)MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID > 0) {
             $this->order_status = MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID;
         }
 
@@ -74,8 +73,7 @@ class payu_account
 
     function check()
     {
-        if (!isset($this->_check))
-        {
+        if (!isset($this->_check)) {
             $check_query = tep_db_query("SELECT configuration_value FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_PAYU_ACCOUNT_STATUS'");
             $this->_check = tep_db_num_rows($check_query);
         }
@@ -91,12 +89,11 @@ class payu_account
     {
         $check_query = tep_db_query("SELECT orders_status_id FROM " . TABLE_ORDERS_STATUS . " WHERE orders_status_name = 'PayU Account [Transactions]' limit 1");
 
-        if (tep_db_num_rows($check_query) < 1)
-        {
+        if (tep_db_num_rows($check_query) < 1) {
             $status_query = tep_db_query("SELECT max(orders_status_id) as status_id FROM " . TABLE_ORDERS_STATUS);
             $status = tep_db_fetch_array($status_query);
 
-            $status_id = $status['status_id']+1;
+            $status_id = $status['status_id'] + 1;
 
             $languages = tep_get_languages();
 
@@ -105,19 +102,16 @@ class payu_account
             }
 
             $flags_query = tep_db_query("DESCRIBE " . TABLE_ORDERS_STATUS . " public_flag");
-            if (tep_db_num_rows($flags_query) == 1)
-            {
+            if (tep_db_num_rows($flags_query) == 1) {
                 tep_db_query("UPDATE " . TABLE_ORDERS_STATUS . " SET public_flag = 0 AND downloads_flag = 0 WHERE orders_status_id = '" . $status_id . "'");
             }
-        }
-        else
-        {
+        } else {
             $check = tep_db_fetch_array($check_query);
 
             $status_id = $check['orders_status_id'];
         }
 
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_VERSION', '1.0.4', '', '6', '0', '', 'payu_version(', now())");
+        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_VERSION', '1.0.5', '', '6', '0', '', 'payu_version(', now())");
 
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable payments with PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_STATUS', 'No', 'Do you want to accept payments with PayU Account?', '6', '1', 'tep_cfg_select_option(array(\'Yes\', \'No\'), ', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Point of sale id number (POS ID)', 'MODULE_PAYMENT_PAYU_ACCOUNT_POS_ID', '', 'OAuth protocol - client_id', '6', '0', now())");
@@ -179,8 +173,7 @@ class payu_account
         $this->order = $order;
         $payu_session_id = $this->create_order();
 
-        if(empty($payu_session_id))
-        {
+        if (empty($payu_session_id)) {
             tep_redirect(tep_href_link(FILENAME_SHOPPING_CART, 'error_message=' . MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_ERROR_IN_CREATING_ORDER));
         }
 
@@ -190,8 +183,7 @@ class payu_account
 
         $payu_session['session_id'] = $payu_session_id;
         $payu_session['shopping_cart'] = ($this->order->info['cart_flow']) ? 1 : 0;
-        if (!tep_session_is_registered('payu_session'))
-        {
+        if (!tep_session_is_registered('payu_session')) {
             tep_session_register('payu_session');
         }
     }
@@ -200,9 +192,9 @@ class payu_account
     {
         global $insert_id, $payu_session;
 
-        $res = tep_db_query("INSERT INTO orders_payu (orders_id, payu_session_id, shopping_cart) VALUES('{$insert_id}', '" . mysql_real_escape_string($payu_session['session_id']) . "', '".mysql_real_escape_string($payu_session['shopping_cart'])."')");
+        $res = tep_db_query("INSERT INTO orders_payu (orders_id, payu_session_id, shopping_cart) VALUES('{$insert_id}', '" . mysql_real_escape_string($payu_session['session_id']) . "', '" . mysql_real_escape_string($payu_session['shopping_cart']) . "')");
 
-        $language_query = tep_db_query("SELECT code FROM " . TABLE_LANGUAGES . " WHERE directory='".tep_db_input($this->language)."' ORDER BY sort_order LIMIT 1");
+        $language_query = tep_db_query("SELECT code FROM " . TABLE_LANGUAGES . " WHERE directory='" . tep_db_input($this->language) . "' ORDER BY sort_order LIMIT 1");
         $language = tep_db_fetch_array($language_query);
 
         $result = OpenPayU_OAuth::accessTokenByClientCredentials();
@@ -213,7 +205,7 @@ class payu_account
     {
         global $cart;
 
-        $string = '<a href="' . tep_href_link('ext/modules/payment/payu/standard.php', '', 'SSL') . '">'.payu_button_image_draw(MODULE_PAYMENT_PAYU_ACCOUNT_IMAGE_BUTTON).'</a>';
+        $string = '<a href="' . tep_href_link('ext/modules/payment/payu/standard.php', '', 'SSL') . '">' . payu_button_image_draw(MODULE_PAYMENT_PAYU_ACCOUNT_IMAGE_BUTTON) . '</a>';
 
         return $string;
     }
@@ -245,10 +237,8 @@ class payu_account
         $this->total_price = array();
         $i = 0;
 
-        if($cart->count_contents()>0)
-        {
-            foreach($cart->get_products() as $product)
-            {
+        if ($cart->count_contents() > 0) {
+            foreach ($cart->get_products() as $product) {
                 $products[$i] = array();
                 $products[$i]['ShoppingCartItem'] = array();
                 $products[$i]['ShoppingCartItem']['Quantity'] = $product['quantity'];
@@ -257,7 +247,8 @@ class payu_account
 
                 $products[$i]['ShoppingCartItem']['Product']['Discount'] = 0;
 
-                $gross = $currencies->calculate_price($product['final_price'], tep_get_tax_rate($product['tax_class_id']), $product['quantity']) * 100;
+                $gross = $currencies->calculate_price($product['final_price'],
+                        tep_get_tax_rate($product['tax_class_id']), 1) * 100;
                 $nett = $product['price'] * 100;
 
                 $item_price = array
@@ -270,7 +261,7 @@ class payu_account
 
                 $products[$i]['ShoppingCartItem']['Product']['UnitPrice'] = $item_price;
 
-                $this->total_price['Gross'] += $item_price['Gross'];
+                $this->total_price['Gross'] += $item_price['Gross'] * $product['quantity'];
                 $this->total_price['Net'] += $item_price['Net'];
                 $this->total_price['Tax'] += $item_price['Tax'];
                 $this->total_price['TaxRate'] = $product['tax'];
@@ -288,43 +279,32 @@ class payu_account
      */
     private function get_shipping_list()
     {
-
-        if ($this->order->content_type == 'physical')
-        {
+        if ($this->order->content_type == 'physical') {
             $shipping_cost = array();
             $ship_to_other_countries = false;
 
-            if (empty($this->order->delivery['country']['id']))
-            {
+            if (empty($this->order->delivery['country']['id'])) {
                 $tmp = tep_get_countries(STORE_COUNTRY, true);
                 $country = $tmp["countries_iso_code_2"];
 
-                if (MODULE_PAYMENT_PAYU_ACCOUNT_ZONE == 0)
-                {
+                if (MODULE_PAYMENT_PAYU_ACCOUNT_ZONE == 0) {
                     $ship_to_other_countries = true;
-                }
-                else
-                {
+                } else {
                     $check_query = tep_db_query("select zone_id from " . TABLE_ZONES_TO_GEO_ZONES . " where geo_zone_id = '" . MODULE_PAYMENT_PAYU_ACCOUNT_ZONE);
 
                     $ship_to_other_countries = false;
-                    while ($check = tep_db_fetch_array($check_query))
-                    {
-                        if ($check['country_id'] != STORE_COUNTRY)
-                        {
+                    while ($check = tep_db_fetch_array($check_query)) {
+                        if ($check['country_id'] != STORE_COUNTRY) {
                             $ship_to_other_countries = true;
                         }
                     }
                 }
-            }
-            else
-            {
+            } else {
                 $country = $this->order->delivery['country']['iso_code_2'];
                 $ship_to_other_countries = false;
             }
 
-            if (!empty($this->order->info['shipping_method']))
-            {
+            if (!empty($this->order->info['shipping_method'])) {
                 $shipping_cost_list[0]['ShippingCost'] = array
                 (
                     'Type' => $this->order->info['shipping_method'],
@@ -338,13 +318,10 @@ class payu_account
                         'CurrencyCode' => $this->order->info['currency']
                     )
                 );
-            }
-            else
-            {
+            } else {
                 require(DIR_WS_CLASSES . 'shipping.php');
 
-                if ($this->order->info['total'] >= MODULE_ORDER_TOTAL_SHIPPING_FREE_SHIPPING_OVER && $this->order->delivery['country']['countries_id'] == STORE_COUNTRY)
-                {
+                if ($this->order->info['total'] >= MODULE_ORDER_TOTAL_SHIPPING_FREE_SHIPPING_OVER && $this->order->delivery['country']['countries_id'] == STORE_COUNTRY) {
                     include(DIR_WS_LANGUAGES . $this->language . '/modules/order_total/ot_shipping.php');
 
                     $shipping_cost_list[0]['ShippingCost'] = array
@@ -360,19 +337,15 @@ class payu_account
                             'CurrencyCode' => $this->order->info['currency']
                         )
                     );
-                }
-                else
-                {
+                } else {
                     $shipping_modules = new shipping;
-                    if ((tep_count_shipping_modules() > 0))
-                    {
+                    if ((tep_count_shipping_modules() > 0)) {
                         $list = $shipping_modules->quote();
+                        $i = 0;
 
-                        foreach ($list as $k => $v)
-                        {
-                            foreach ($v['methods'] as $k2 => $v2)
-                            {
-                                $shipping_cost_list[0]['ShippingCost'] = array
+                        foreach ($list as $k => $v) {
+                            foreach ($v['methods'] as $k2 => $v2) {
+                                $shipping_cost_list[$i]['ShippingCost'] = array
                                 (
                                     'Type' => $v['module'] . ' (' . $v2['title'] . ')',
                                     'CountryCode' => $country,
@@ -386,6 +359,7 @@ class payu_account
                                     )
                                 );
                             }
+                            $i++;
                         }
                     }
                 }
@@ -410,18 +384,16 @@ class payu_account
      */
     private function get_customer_data()
     {
-        if(!empty($this->order->customer['firstname']) && !empty($this->order->customer['lastname']))
-        {
-            if($this->order->customer['email_address'])
-            $customer = array(
-                'Email' => $this->order->customer['email_address'],
-                'Phone' => $this->order->customer['telephone'],
-                'FirstName' => $this->order->customer['firstname'],
-                'LastName' => $this->order->customer['lastname']
-            );
+        if (!empty($this->order->customer['firstname']) && !empty($this->order->customer['lastname'])) {
+            if ($this->order->customer['email_address'])
+                $customer = array(
+                    'Email' => $this->order->customer['email_address'],
+                    'Phone' => $this->order->customer['telephone'],
+                    'FirstName' => $this->order->customer['firstname'],
+                    'LastName' => $this->order->customer['lastname']
+                );
 
-            if(!empty($this->order->delivery['street_address']))
-            {
+            if (!empty($this->order->delivery['street_address'])) {
                 $address = $this->parse_address($this->order->delivery['street_address']);
                 $customer['Shipping'] = array
                 (
@@ -437,8 +409,7 @@ class payu_account
                 );
             }
 
-            if(!empty($this->order->billing['street_address']))
-            {
+            if (!empty($this->order->billing['street_address'])) {
                 $address = $this->parse_address($this->order->billing['street_address']);
                 $customer['Invoice'] = array
                 (
@@ -464,11 +435,11 @@ class payu_account
      */
     private function create_order()
     {
-        $this->session_id = md5(rand()*time());
-        $this->req_id = md5(rand()*rand()*microtime(true));
+        $this->session_id = md5(rand() * time());
+        $this->req_id = md5(rand() * rand() * microtime(true));
 
         if (!empty($this->orders_id))
-            $order_url = tep_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'order_id=' . (int) $this->orders_id);
+            $order_url = tep_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'order_id=' . (int)$this->orders_id);
         else
             $order_url = tep_href_link('ext/modules/payment/payu/redirect.php', 'payu_session_id=' . $this->session_id);
 
@@ -476,7 +447,7 @@ class payu_account
 
         $order = array
         (
-            'ReqId' =>  md5(rand()*time()),
+            'ReqId' => md5(rand() * time()),
             'CustomerIp' => $this->get_ip(),
             'NotifyUrl' => tep_href_link('ext/modules/payment/payu/notify.php'),
             'OrderCancelUrl' => tep_href_link('ext/modules/payment/payu/cancel.php'),
@@ -501,15 +472,13 @@ class payu_account
 
         #prepare customer data
         $customer = $this->get_customer_data();
-        if(!empty($customer))
-        {
+        if (!empty($customer)) {
             $order['Customer'] = $customer;
         }
 
         #prepare shipping cost list
         $shipping_cost = $this->get_shipping_list();
-        if(!empty($shipping_cost))
-        {
+        if (!empty($shipping_cost)) {
             $order['ShippingCost'] = $shipping_cost;
         }
 
@@ -517,12 +486,9 @@ class payu_account
         $result = OpenPayU_Order::create($order);
 
         #if response success is true return session_id
-        if($result->getSuccess() == TRUE)
-        {
+        if ($result->getSuccess() == TRUE) {
             return $this->session_id;
-        }
-        else
-        {
+        } else {
             $this->addLog($result->getError() . ' ' . $result->getMessage() . ' [request: ' . serialize($result->getRequest()) . ', response: ' . serialize($result->getResponse()) . ']');
             return null;
         }
@@ -535,20 +501,13 @@ class payu_account
      */
     private function parse_address($street)
     {
-        if (preg_match("/^(?P<street>.*) (?P<houseNumber>[0-9]+)\/(?P<apartmentNumber>[0-9]+)$/i", $street, $result))
-        {
+        if (preg_match("/^(?P<street>.*) (?P<houseNumber>[0-9]+)\/(?P<apartmentNumber>[0-9]+)$/i", $street, $result)) {
             return array('street' => $result['street'], 'houseNumber' => $result['houseNumber'], 'apartmentNumber' => $result['apartmentNumber']);
-        }
-        else if (preg_match("/^(?P<street>.*) (?P<houseNumber>[0-9]+) ?m\.? ?(?P<apartmentNumber>[0-9]+)$/i", $street, $result))
-        {
+        } else if (preg_match("/^(?P<street>.*) (?P<houseNumber>[0-9]+) ?m\.? ?(?P<apartmentNumber>[0-9]+)$/i", $street, $result)) {
             return array('street' => $result['street'], 'houseNumber' => $result['houseNumber'], 'apartmentNumber' => $result['apartmentNumber']);
-        }
-        else if (preg_match("/^(?P<street>.*) (?P<houseNumber>[0-9]+)$/i", $street, $result))
-        {
+        } else if (preg_match("/^(?P<street>.*) (?P<houseNumber>[0-9]+)$/i", $street, $result)) {
             return array('street' => $result['street'], 'houseNumber' => $result['houseNumber'], 'apartmentNumber' => '');
-        }
-        else
-        {
+        } else {
             return array('street' => $street, 'houseNumber' => 0, 'apartmentNumber' => 0);
         }
     }
@@ -560,11 +519,10 @@ class payu_account
      */
     function get_order_id_by_session($payu_session_id)
     {
-        $query = tep_db_query('SELECT orders_id FROM orders_payu WHERE payu_session_id="'.stripslashes($payu_session_id).'"');
+        $query = tep_db_query('SELECT orders_id FROM orders_payu WHERE payu_session_id="' . stripslashes($payu_session_id) . '"');
         $order_query = tep_db_fetch_array($query);
 
-        if($order_query['orders_id'])
-        {
+        if ($order_query['orders_id']) {
             return intval($order_query['orders_id']);
         }
 
@@ -584,14 +542,12 @@ class payu_account
         $payu_session_id = $ord['SessionId'];
         $orders_id = $this->get_order_id_by_session($payu_session_id);
 
-        if(!empty($orders_id))
-        {
+        if (!empty($orders_id)) {
             require(DIR_WS_CLASSES . 'order.php');
             $order = new order($orders_id);
 
             $orders_status = (MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID > 0 ? (int)MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID : (int)DEFAULT_ORDERS_STATUS_ID);
-            if($order->info['status'] == 0 || MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID == $order->info['status'])
-            {
+            if ($order->info['status'] == 0 || MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID == $order->info['status']) {
                 $order->info['status'] = (int)MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID;
             }
 
@@ -614,7 +570,7 @@ class payu_account
             $order->delivery['name'] = trim($ord['Shipping']['Address']['RecipientName']);
 
             $order->delivery['company'] = '';
-            $order->delivery['street_address'] = (trim($ord['Shipping']['Address']['Street'])) ? trim($ord['Shipping']['Address']['Street']) .' ' . $ord['Shipping']['Address']['HouseNumber'] . ((!empty($ord['Shipping']['Address']['ApartmentNumber'])) ? '/'.$ord['Shipping']['Address']['ApartmentNumber'] : '') : '';
+            $order->delivery['street_address'] = (trim($ord['Shipping']['Address']['Street'])) ? trim($ord['Shipping']['Address']['Street']) . ' ' . $ord['Shipping']['Address']['HouseNumber'] . ((!empty($ord['Shipping']['Address']['ApartmentNumber'])) ? '/' . $ord['Shipping']['Address']['ApartmentNumber'] : '') : '';
             $order->delivery['city'] = trim($ord['Shipping']['Address']['City']);
             $order->delivery['suburb'] = '';
             $order->delivery['postcode'] = trim($ord['Shipping']['Address']['PostalCode']);
@@ -623,8 +579,7 @@ class payu_account
             $order->delivery['format_id'] = $format_id;
 
             // if get empty delivery field
-            if(empty($order->delivery['name']))
-            {
+            if (empty($order->delivery['name'])) {
                 $order->delivery['name'] = $order->customer['name'];
                 $order->delivery['company'] = $order->customer['company'];
                 $order->delivery['street_address'] = $order->customer['street_address'];
@@ -637,19 +592,16 @@ class payu_account
             }
 
             // If retrieve Billing data
-            if(isset($ord['Invoice']['Billing']))
-            {
+            if (isset($ord['Invoice']['Billing'])) {
                 $country_billing = $this->get_country_title_by_iso_code_2($ord['Invoice']['Billing']['CountryCode']);
 
                 $order->billing['name'] = trim($ord['Invoice']['Billing']['RecipientName']);
                 $order->billing['company'] = '';
 
-                if(isset($ord['Invoice']['Billing']['Street']))
-                {
-                    $order->billing['street_address'] = $ord['Invoice']['Billing']['Street'].' '.$ord['Invoice']['Billing']['HouseNumber'];
-                    if(isset($ord['Invoice']['Billing']['ApartmentNumber']))
-                    {
-                        $order->billing['street_address'] .= '/'.$ord['Invoice']['Billing']['ApartmentNumber'];
+                if (isset($ord['Invoice']['Billing']['Street'])) {
+                    $order->billing['street_address'] = $ord['Invoice']['Billing']['Street'] . ' ' . $ord['Invoice']['Billing']['HouseNumber'];
+                    if (isset($ord['Invoice']['Billing']['ApartmentNumber'])) {
+                        $order->billing['street_address'] .= '/' . $ord['Invoice']['Billing']['ApartmentNumber'];
                     }
                 }
 
@@ -659,10 +611,8 @@ class payu_account
                 $order->billing['state'] = trim($ord['Invoice']['Billing']['State']);
                 $order->billing['country'] = $country_billing;
                 $order->billing['format_id'] = $format_id;
-            }
-            // If not retrieve assign the customer
-            else
-            {
+            } // If not retrieve assign the customer
+            else {
                 $order->billing['name'] = $order->customer['name'];
                 $order->billing['company'] = $order->customer['company'];
                 $order->billing['street_address'] = $order->customer['street_address'];
@@ -675,8 +625,7 @@ class payu_account
             }
 
             #update order data
-            if($ord['OrderStatus'] == 'ORDER_STATUS_PENDING')
-            {
+            if ($ord['OrderStatus'] == 'ORDER_STATUS_PENDING') {
                 $sql_data_array = array
                 (
                     'customers_id' => $order->customer['customer_id'],
@@ -733,28 +682,22 @@ class payu_account
                 $order_total_modules = new order_total;
 
                 // Remove orders shipping info
-                tep_db_query('DELETE FROM ' . TABLE_ORDERS_TOTAL . ' WHERE orders_id = '.tep_db_input($orders_id));
+                tep_db_query('DELETE FROM ' . TABLE_ORDERS_TOTAL . ' WHERE orders_id = ' . tep_db_input($orders_id));
 
                 // Add orders shipping info
                 $order_totals = $order_total_modules->process();
                 $sizeof = sizeof($order_totals);
-                for ($i = 0, $n = $sizeof; $i < $n; $i++)
-                {
-                    if($order_totals[$i]['code'] == 'ot_shipping')
-                    {
+                for ($i = 0, $n = $sizeof; $i < $n; $i++) {
+                    if ($order_totals[$i]['code'] == 'ot_shipping') {
                         $order_totals[$i]['title'] = $order->info['shipping_method'];
-                        $order_totals[$i]['value'] = ($ord['Shipping']['ShippingCost']['Gross']/100);
-                        $order_totals[$i]['text'] = $currencies->format($ord['Shipping']['ShippingCost']['Gross']/100);
-                    }
-                    elseif($order_totals[$i]['code'] == 'ot_total')
-                    {
-                        $order_totals[$i]['value'] = ($ord['PaidAmount']/100);
-                        $order_totals[$i]['text'] = '<strong>'.$currencies->format($ord['PaidAmount']/100).'</strong>';
-                    }
-                    elseif($order_totals[$i]['code'] == 'ot_subtotal')
-                    {
-                        $order_totals[$i]['value'] = (($ord['PaidAmount']-$ord['Shipping']['ShippingCost']['Gross'])/100);
-                        $order_totals[$i]['text'] = $currencies->format(($ord['PaidAmount']-$ord['Shipping']['ShippingCost']['Gross'])/100);
+                        $order_totals[$i]['value'] = ($ord['Shipping']['ShippingCost']['Gross'] / 100);
+                        $order_totals[$i]['text'] = $currencies->format($ord['Shipping']['ShippingCost']['Gross'] / 100);
+                    } elseif ($order_totals[$i]['code'] == 'ot_total') {
+                        $order_totals[$i]['value'] = ($ord['PaidAmount'] / 100);
+                        $order_totals[$i]['text'] = '<strong>' . $currencies->format($ord['PaidAmount'] / 100) . '</strong>';
+                    } elseif ($order_totals[$i]['code'] == 'ot_subtotal') {
+                        $order_totals[$i]['value'] = (($ord['PaidAmount'] - $ord['Shipping']['ShippingCost']['Gross']) / 100);
+                        $order_totals[$i]['text'] = $currencies->format(($ord['PaidAmount'] - $ord['Shipping']['ShippingCost']['Gross']) / 100);
                     }
 
                     $sql_data_array = array(
@@ -771,14 +714,11 @@ class payu_account
             }
 
             #add order status
-            if($ord['OrderStatus']=='ORDER_STATUS_COMPLETE' || $ord['PaymentStatus'] == 'PAYMENT_STATUS_END')
-            {
+            if ($ord['OrderStatus'] == 'ORDER_STATUS_COMPLETE' || $ord['PaymentStatus'] == 'PAYMENT_STATUS_END') {
                 $order_status = $order->info['status'];
                 $comment_order_status = MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_COMMENT_TRANSACTION_FINISHED;
                 $notify = TRUE;
-            }
-            else
-            {
+            } else {
                 $order_status = (int)MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID;
                 $notify = FALSE;
                 $comment_order_status = $ord['OrderStatus'];
@@ -789,7 +729,7 @@ class payu_account
                 'orders_status_id' => $order_status,
                 'date_added' => 'now()',
                 'customer_notified' => ($notify == TRUE) ? '1' : '0',
-                'comments' => trim(MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_COMMENT_NOTIFICATION.' [ ' . $comment_order_status . ' ]')
+                'comments' => trim(MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_COMMENT_NOTIFICATION . ' [ ' . $comment_order_status . ' ]')
             );
 
             $this->add_order_status_history($status);
@@ -808,8 +748,7 @@ class payu_account
 
         $country['title'] = '';
 
-        if (tep_db_num_rows($country_query))
-        {
+        if (tep_db_num_rows($country_query)) {
             $tmp = tep_db_fetch_array($country_query);
 
             $country['title'] = $tmp['countries_name'];
@@ -826,8 +765,7 @@ class payu_account
     private function get_customer_id_by_mail($mail)
     {
         $res = tep_db_query("SELECT customers_id FROM " . TABLE_CUSTOMERS . " WHERE customers_email_address = '" . tep_db_input($mail) . "' LIMIT 1");
-        if (tep_db_num_rows($res))
-        {
+        if (tep_db_num_rows($res)) {
             $row = tep_db_fetch_array($res);
             return intval($row['customer_id']);
         }
@@ -847,15 +785,13 @@ class payu_account
         global $order, $language;
         $orders_id = $this->get_order_id_by_session($payu_session_id);
 
-        if(!empty($orders_id))
-        {
+        if (!empty($orders_id)) {
             require(DIR_WS_CLASSES . 'order.php');
             $order = new order($orders_id);
 
             //check is country
             $country_query = tep_db_query("SELECT * FROM " . TABLE_COUNTRIES . " WHERE countries_iso_code_2 = '" . tep_db_input($country_iso_code) . "' LIMIT 1");
-            if (tep_db_num_rows($country_query))
-            {
+            if (tep_db_num_rows($country_query)) {
                 $country = tep_db_fetch_array($country_query);
                 $order->delivery['country_id'] = $country['countries_id'];
             }
@@ -865,17 +801,14 @@ class payu_account
             $shipping_list = array();
 
             $pass = false;
-            switch (MODULE_ORDER_TOTAL_SHIPPING_DESTINATION)
-            {
+            switch (MODULE_ORDER_TOTAL_SHIPPING_DESTINATION) {
                 case 'national':
-                    if ($order->delivery['country_id'] == STORE_COUNTRY)
-                    {
+                    if ($order->delivery['country_id'] == STORE_COUNTRY) {
                         $pass = true;
                     }
                     break;
                 case 'international':
-                    if ($order->delivery['country_id'] != STORE_COUNTRY)
-                    {
+                    if ($order->delivery['country_id'] != STORE_COUNTRY) {
                         $pass = true;
                     }
                     break;
@@ -884,10 +817,8 @@ class payu_account
                     break;
             }
             $pass = true;
-            if($pass == true)
-            {
-                if ($order->info['total'] >= MODULE_ORDER_TOTAL_SHIPPING_FREE_SHIPPING_OVER)
-                {
+            if ($pass == true) {
+                if ($order->info['total'] >= MODULE_ORDER_TOTAL_SHIPPING_FREE_SHIPPING_OVER) {
                     include(DIR_WS_LANGUAGES . $language . '/modules/order_total/ot_shipping.php');
 
                     $shipping_cost_list['ShippingCostList'][]['ShippingCost'] = array
@@ -903,20 +834,14 @@ class payu_account
                             'CurrencyCode' => $order->info['currency']
                         )
                     );
-                }
-                else
-                {
+                } else {
                     $shipping_modules = new shipping;
-                    if ((tep_count_shipping_modules() > 0))
-                    {
+                    if ((tep_count_shipping_modules() > 0)) {
                         $list = $shipping_modules->quote();
 
-                        foreach ($list as $k => $v)
-                        {
-                            foreach ($v['methods'] as $k2 => $v2)
-                            {
-                                if(!isset($v['error']))
-                                {
+                        foreach ($list as $k => $v) {
+                            foreach ($v['methods'] as $k2 => $v2) {
+                                if (!isset($v['error'])) {
                                     $shipping_cost_list['ShippingCostList'][$k]['ShippingCost'] = array
                                     (
                                         'Type' => $v['module'] . ' (' . $v2['title'] . ')',
@@ -957,14 +882,13 @@ class payu_account
      */
     private function add_order_status_history($status)
     {
-        $sql = "UPDATE " . TABLE_ORDERS . " SET orders_status='" . $status['orders_status_id'] . "' WHERE orders_id='" . (int) $status['orders_id'] . "'";
+        $sql = "UPDATE " . TABLE_ORDERS . " SET orders_status='" . $status['orders_status_id'] . "' WHERE orders_id='" . (int)$status['orders_id'] . "'";
         tep_db_query($sql);
 
-        $status_query = tep_db_query("SELECT orders_status_history_id FROM " . TABLE_ORDERS_STATUS_HISTORY . " WHERE orders_id='" . (int) $status['orders_id'] . "' AND comments = '".$status['comments']."'");
+        $status_query = tep_db_query("SELECT orders_status_history_id FROM " . TABLE_ORDERS_STATUS_HISTORY . " WHERE orders_id='" . (int)$status['orders_id'] . "' AND comments = '" . $status['comments'] . "'");
         $status_history = tep_db_fetch_array($status_query);
 
-        if($status_history['orders_status_history_id']==0)
-        {
+        if ($status_history['orders_status_history_id'] == 0) {
             tep_db_perform(TABLE_ORDERS_STATUS_HISTORY, $status);
         }
     }
@@ -978,15 +902,13 @@ class payu_account
  */
 function payu_button_image_draw($type)
 {
-    if(MODULE_PAYMENT_PAYU_ACCOUNT_SHOW_IN_CART == TRUE)
-    {
-        $json_data = get_payu_json_data('http://www.openpayu.com/'.strtolower(MODULE_PAYMENT_PAYU_ACCOUNT_LANGUAGE_LOCALE).'/goods/json');
+    if (MODULE_PAYMENT_PAYU_ACCOUNT_SHOW_IN_CART == TRUE) {
+        $json_data = get_payu_json_data('http://www.openpayu.com/' . strtolower(MODULE_PAYMENT_PAYU_ACCOUNT_LANGUAGE_LOCALE) . '/goods/json');
         $buttons = $json_data->media->buttons;
 
-        switch ($type)
-        {
+        switch ($type) {
             default:
-                return '<img src="'.$buttons->{$type}.'" alt="'.MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_BUTTON.'" />';
+                return '<img src="' . $buttons->{$type} . '" alt="' . MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_BUTTON . '" />';
                 break;
         }
     }
@@ -1003,12 +925,11 @@ function payu_image_selection($type, $name)
 
     $name = 'configuration[' . $name . ']';
 
-    $json_data = get_payu_json_data('http://www.openpayu.com/'.strtolower(MODULE_PAYMENT_PAYU_ACCOUNT_LANGUAGE_LOCALE).'/goods/json');
+    $json_data = get_payu_json_data('http://www.openpayu.com/' . strtolower(MODULE_PAYMENT_PAYU_ACCOUNT_LANGUAGE_LOCALE) . '/goods/json');
 
     $buttons = count((array)$json_data->media->buttons);
 
-    for($i=1;$i<=$buttons;$i++)
-    {
+    for ($i = 1; $i <= $buttons; $i++) {
         $html .= tep_draw_radio_field($name, $i, ($type == $i ? true : false)) . payu_button_image_draw($i) . '<br /><br />';
     }
 
@@ -1018,9 +939,9 @@ function payu_image_selection($type, $name)
 function payu_version($type, $name)
 {
     $aver = convert_version($type);
-    $json_plugin = get_payu_json_data('http://www.openpayu.com/'.strtolower(MODULE_PAYMENT_PAYU_ACCOUNT_LANGUAGE_LOCALE).'/goods/plugin/osc/231/'.$aver.'/json');
+    $json_plugin = get_payu_json_data('http://www.openpayu.com/' . strtolower(MODULE_PAYMENT_PAYU_ACCOUNT_LANGUAGE_LOCALE) . '/goods/plugin/osc/231/' . $aver . '/json');
 
-    $json = get_payu_json_data('http://www.openpayu.com/'.strtolower(MODULE_PAYMENT_PAYU_ACCOUNT_LANGUAGE_LOCALE).'/goods/json');
+    $json = get_payu_json_data('http://www.openpayu.com/' . strtolower(MODULE_PAYMENT_PAYU_ACCOUNT_LANGUAGE_LOCALE) . '/goods/json');
     $osc_json_version = $json->plugins->osc->{"2.3.1"};
     $new_version_plugin = convert_version($osc_json_version->version);
 
@@ -1028,28 +949,21 @@ function payu_version($type, $name)
 
     $txt = '';
 
-    if($new_version_plugin>$aver)
-    {
-        $txt .= '<p>'.MODULE_PAYMENT_PAYU_ACCOUNT_NEW_VERSION.'<br /><a href="http://'.$osc_json_version->repository.'">'.$osc_json_version->repository.'</a></p>';
+    if ($new_version_plugin > $aver) {
+        $txt .= '<p>' . MODULE_PAYMENT_PAYU_ACCOUNT_NEW_VERSION . '<br /><a href="http://' . $osc_json_version->repository . '">' . $osc_json_version->repository . '</a></p>';
     }
 
-    $txt .= '<p>'.$json_plugin->description.'</p>';
+    $txt .= '<p>' . $json_plugin->description . '</p>';
 
-    if($json_plugin->docs)
-    {
-        foreach($json_plugin->docs as $doc)
-        {
+    if ($json_plugin->docs) {
+        foreach ($json_plugin->docs as $doc) {
             $docs_arr = (array)$doc;
-            if(is_array($docs_arr) && !empty($docs_arr))
-            {
+            if (is_array($docs_arr) && !empty($docs_arr)) {
                 $docs = $doc;
-                foreach ($docs as $doc)
-                {
+                foreach ($docs as $doc) {
                     $txt .= '<img src="images/icon_popup.gif" border="0" /> <a href="' . $doc->url . '" target="_blank">' . $doc->name . '</a><br />';
                 }
-            }
-            else
-            {
+            } else {
                 $txt .= '<img src="images/icon_popup.gif" border="0" /> <a href="' . $doc->url . '" target="_blank">' . $doc->name . '</a><br />';
             }
         }
@@ -1065,12 +979,10 @@ function convert_version($version)
 
 function get_payu_json_data($url)
 {
-    if(!empty($url))
-    {
+    if (!empty($url)) {
         $data = get_json($url);
 
-        if(!empty($data))
-        {
+        if (!empty($data)) {
             return json_decode($data);
         }
     }
@@ -1080,8 +992,7 @@ function get_payu_json_data($url)
 
 function get_json($url)
 {
-    if($url)
-    {
+    if ($url) {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

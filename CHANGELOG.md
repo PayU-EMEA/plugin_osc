@@ -1,3 +1,8 @@
+## 1.0.5
+
+* Fixed shipping list counter [#12]
+* Fixed products pricing [#13]
+
 ## 1.0.4
 
 * Removed code value of product
