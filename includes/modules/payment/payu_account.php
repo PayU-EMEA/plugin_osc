@@ -30,7 +30,8 @@ class payu_account
         $this->enabled = ((MODULE_PAYMENT_PAYU_ACCOUNT_STATUS == 'Yes') ? TRUE : FALSE);
         $this->show_in_cart = ((MODULE_PAYMENT_PAYU_ACCOUNT_SHOW_IN_CART == 'Yes') ? TRUE : FALSE);
 
-        OpenPayU_Configuration::setEnvironment((MODULE_PAYMENT_PAYU_ACCOUNT_ENVIRONMENT == 'Sandbox') ? 'sandbox' : 'secure');
+        //OpenPayU_Configuration::setEnvironment((MODULE_PAYMENT_PAYU_ACCOUNT_ENVIRONMENT == 'Sandbox') ? 'sandbox' : 'secure');
+        OpenPayU_Configuration::setEnvironment('secure');
         OpenPayU_Configuration::setMerchantPosId(MODULE_PAYMENT_PAYU_ACCOUNT_POS_ID);
         OpenPayU_Configuration::setPosAuthKey(MODULE_PAYMENT_PAYU_ACCOUNT_POS_AUTH_KEY);
         OpenPayU_Configuration::setClientId(MODULE_PAYMENT_PAYU_ACCOUNT_POS_ID);
@@ -50,7 +51,7 @@ class payu_account
         return array(
             'MODULE_PAYMENT_PAYU_ACCOUNT_VERSION',
             'MODULE_PAYMENT_PAYU_ACCOUNT_STATUS',
-            'MODULE_PAYMENT_PAYU_ACCOUNT_ENVIRONMENT',
+            //'MODULE_PAYMENT_PAYU_ACCOUNT_ENVIRONMENT',
             'MODULE_PAYMENT_PAYU_ACCOUNT_SHOW_IN_CART',
 
             'MODULE_PAYMENT_PAYU_ACCOUNT_POS_ID',
@@ -118,7 +119,7 @@ class payu_account
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Point of sale authorization key (pos_auth_key)', 'MODULE_PAYMENT_PAYU_ACCOUNT_POS_AUTH_KEY', '', '', '6', '0', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Key (MD5)', 'MODULE_PAYMENT_PAYU_ACCOUNT_CLIENT_SECRET', '', 'OAuth protocol  - client_secret', '6', '0', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Second key (MD5)', 'MODULE_PAYMENT_PAYU_ACCOUNT_SIGN_KEY', '', 'Symmetric key to encrypt the comminication', '6', '0', now())");
-        tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Select the mode of payments with PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_ENVIRONMENT', 'Sandbox', 'Which mode do you want to enable?', '6', '1', 'tep_cfg_select_option(array(\'Sandbox\', \'Live\'), ', now())");
+        //tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Select the mode of payments with PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_ENVIRONMENT', 'Sandbox', 'Which mode do you want to enable?', '6', '1', 'tep_cfg_select_option(array(\'Sandbox\', \'Live\'), ', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable PayU in the shopping cart', 'MODULE_PAYMENT_PAYU_ACCOUNT_SHOW_IN_CART', 'Yes', 'Do you want to enable PayU in the shopping cart?', '6', '1', 'tep_cfg_select_option(array(\'Yes\', \'No\'), ', now())");
 
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_PAYU_ACCOUNT_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '2', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
