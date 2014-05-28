@@ -83,6 +83,7 @@ class payu_account
 
     function remove()
     {
+    	tep_db_query("DELETE FROM " . TABLE_CONFIGURATION . " WHERE configuration_key = 'MODULE_PAYMENT_PAYU_ACCOUNT_ENVIRONMENT'");
         tep_db_query("DELETE FROM " . TABLE_CONFIGURATION . " WHERE configuration_key IN ('" . implode("', '", $this->keys()) . "')");
     }
 
