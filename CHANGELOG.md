@@ -1,3 +1,7 @@
+## 1.1.0
+
+* SDK v2 compatible
+
 ## 1.0.5
 
 * Fixed shipping list counter [#12]

@@ -10,6 +10,8 @@
 */
 
 include_once 'top.php';
-
+echo 'Oooopsss... there was an error while finalizing your PayU payment.';
+exit;
 // Redirect to Shopping Cart
-tep_redirect(tep_href_link(FILENAME_SHOPPING_CART));
+//tep_redirect(tep_href_link(FILENAME_SHOPPING_CART));
+//tep_redirect(tep_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL'));

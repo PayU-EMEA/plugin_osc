@@ -11,14 +11,19 @@
 
 include_once 'top.php';
 
-if (!empty($_POST['DOCUMENT'])) {
-    $xml = stripslashes($_POST['DOCUMENT']);
-    $result = OpenPayU_Order::consumeMessage($xml);
 
-    if ($result->getMessage() == 'OrderNotifyRequest') {
-        if ($result->getSuccess() == TRUE) {
-            $retrieve = OpenPayU_Order::retrieve($result->getSessionId());
-            $payu_account->update_order($retrieve->getResponse());
-        }
-    }
+$body = file_get_contents ( 'php://input' );
+$data =  trim ( $body );
+
+$result = OpenPayU_Order::consumeNotification ( $data );
+
+$response = $result->getResponse();
+
+if ($response->order->orderId) {
+		
+	$payu_account->update_order($response->order);
+	$rsp = OpenPayU::buildOrderNotifyResponse ( $response->order->orderId );
+
+	header("Content-Type: application/json");
+	echo $rsp;
 }

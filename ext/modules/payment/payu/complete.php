@@ -14,4 +14,5 @@ include_once 'top.php';
 $cart->reset(true);
 
 // Redirect to thank you page
+//tep_redirect(tep_href_link(FILENAME_SHOPPING_CART));
 tep_redirect(tep_href_link(FILENAME_CHECKOUT_SUCCESS, '', 'SSL'));

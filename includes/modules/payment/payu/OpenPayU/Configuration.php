@@ -2,17 +2,18 @@
 
 /*
 	OpenPayU Standard Library
-	
-	@copyright  Copyright (c) 2011-2012 PayU
+
+	@copyright  Copyright (c) 2011-2014 PayU
 	@license    http://opensource.org/licenses/LGPL-3.0  Open Software License (LGPL 3.0)
 	http://www.payu.com
-	http://openpayu.com
+	http://developers.payu.com
 	http://twitter.com/openpayu
 */
 
 class OpenPayU_Configuration
 {
-    public static $env = 'sandbox';
+    private static $_availableEnvironment = array('custom', 'secure');
+    public static $env = 'secure';
     public static $merchantPosId = '';
     public static $posAuthKey = '';
     public static $clientId = '';
@@ -24,34 +25,100 @@ class OpenPayU_Configuration
     public static $authUrl = '';
     public static $serviceDomain = '';
 
+    private static $apiVersion = 2;
+    private static $_availableHashAlgorithm = array('MD5', 'SHA', 'SHA1', 'SHA-1', 'SHA-256', 'SHA256', 'SHA_256');
+    private static $hashAlgorithm = 'SHA-1';
+
+    private static $dataFormat = 'json';
+
+    private static $sender = 'Generic';
+
+    const COMPOSER_JSON = "/composer.json";
+    const DEFAULT_SDK_VERSION = 'PHP SDK 2.0.X';
+
+
+    /**
+     * @access public
+     * @param int $version
+     * @throws OpenPayU_Exception_Configuration
+     */
+    public static function setApiVersion($version)
+    {
+        if (empty($version))
+            throw new OpenPayU_Exception_Configuration('Invalid API version');
+
+        self::$apiVersion = intval($version);
+    }
+
+    /**
+     * @return int
+     */
+    public static function getApiVersion()
+    {
+        return self::$apiVersion;
+    }
+
+    /**
+     * @access public
+     * @param string
+     * @throws OpenPayU_Exception_Configuration
+     */
+    public static function setHashAlgorithm($value)
+    {
+        if (!in_array($value, self::$_availableHashAlgorithm))
+            throw new OpenPayU_Exception_Configuration($value . ' - is not available');
+
+        self::$hashAlgorithm = $value;
+    }
+
+    /**
+     * @access public
+     * @return string
+     */
+    public static function getHashAlgorithm()
+    {
+        return self::$hashAlgorithm;
+    }
+
     /**
      * @access public
      * @param string $value
      * @param string $domain
      * @param string $country
-     * @throws Exception
+     * @throws OpenPayU_Exception_Configuration
      */
-    public static function setEnvironment($value = 'sandbox', $domain = 'payu.pl', $country = 'pl')
+    public static function setEnvironment($value = 'secure', $domain = 'payu.pl', $country = 'pl')
     {
         $value = strtolower($value);
-        $domain = strtolower($domain);
-        $country = strtolower($country);
+        $domain = strtolower($domain) . '/';
+        $country = strtolower($country) . '/';
+        $service = 'standard/';
 
-        if ($value == 'sandbox' || $value == 'secure') {
+        if (!in_array($value, self::$_availableEnvironment))
+            throw new OpenPayU_Exception_Configuration($value . ' - is not valid environment');
+
+        if (self::getApiVersion() >= 2) {
+            $country = 'api/';
+            $service = 'v2/';
+        }
+
+        if ($value == 'secure') {
             self::$env = $value;
+
+            if (self::getApiVersion() >= 2)
+                $domain = 'payu.com/';
+
             self::$serviceDomain = $domain;
 
-            self::$serviceUrl = 'https://' . $value . '.' . $domain . '/' . $country . '/standard/';
+            self::$serviceUrl = 'https://' . $value . '.' . $domain . $country . $service;
             self::$summaryUrl = self::$serviceUrl . 'co/summary';
             self::$authUrl = self::$serviceUrl . 'oauth/user/authorize';
         } else if ($value == 'custom') {
             self::$env = $value;
 
-            self::$serviceUrl = $domain . '/' . $country . '/standard/';
+            self::$serviceUrl = $domain . $country . $service;
             self::$summaryUrl = self::$serviceUrl . 'co/summary';
             self::$authUrl = self::$serviceUrl . 'oauth/user/authorize';
-        } else {
-            throw new Exception('Invalid value:' . $value . ' for environment. Proper values are: "sandbox" or "secure".');
         }
     }
 
@@ -181,4 +248,64 @@ class OpenPayU_Configuration
         return self::$signatureKey;
     }
 
+    /**
+     * @access public
+     * @return string
+     */
+    public static function getDataFormat($withDot = false)
+    {
+        if ($withDot) {
+            return "." . self::$dataFormat;
+        }
+
+        return self::$dataFormat;
+    }
+
+    /**
+     * @access public
+     * @param string $sender
+     */
+    public static function setSender($sender)
+    {
+        self::$sender = $sender;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getSender()
+    {
+        return self::$sender;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getFullSenderName()
+    {
+        return sprintf("%s@%s", self::getSender(), self::getSdkVersion());
+    }
+
+    /**
+     * @return string
+     */
+    public static function getSdkVersion()
+    {
+        $composerFilePath = self::getComposerFilePath();
+        if (file_exists($composerFilePath)) {
+            $fileContent = file_get_contents($composerFilePath);
+            $composerData = json_decode($fileContent);
+            if (isset($composerData->version) && isset($composerData->extra[0]->engine) )
+                return sprintf("%s %s", $composerData->extra[0]->engine, $composerData->version);
+        }
+        return self::DEFAULT_SDK_VERSION;
+    }
+
+    /**
+     * @return string
+     */
+    private static function getComposerFilePath()
+    {
+        return '../../'.self::COMPOSER_JSON;
+    }
 }
