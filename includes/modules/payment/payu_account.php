@@ -41,7 +41,7 @@ class payu_account
         OpenPayU_Configuration::setEnvironment('secure');
         OpenPayU_Configuration::setMerchantPosId(MODULE_PAYMENT_PAYU_ACCOUNT_POS_ID);
         OpenPayU_Configuration::setSignatureKey(MODULE_PAYMENT_PAYU_ACCOUNT_SIGN_KEY);
-        OpenPayU_Configuration::setSender("OsCommerce ver " . "/Plugin ver " . $this->_config->getPluginVersion());
+        OpenPayU_Configuration::setSender("OsCommerce ver " . "/Plugin ver " . $this->description);
 
         if ((int)MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID > 0) {
             $this->order_status = MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID;
