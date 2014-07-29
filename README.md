@@ -3,7 +3,7 @@
 PayU account is a web application designed as an e-wallet for shoppers willing to open an account, define their payment options, see their purchase history and manage personal profiles.
 
 ##Features
-The PayU payments OsCommerce plugin adds the PayU payment option and enables you to process the following operations in your e-shop:
+The PayU payments osCommerce plugin adds the PayU payment option and enables you to process the following operations in your e-shop:
 
 * Creating a payment order (with discounts included)
 * Cancelling a payment order
