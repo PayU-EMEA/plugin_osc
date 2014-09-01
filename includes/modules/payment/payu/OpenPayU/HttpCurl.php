@@ -66,6 +66,7 @@ class OpenPayU_HttpCurl implements OpenPayU_HttpProtocol
         curl_setopt($ch, CURLOPT_USERPWD, $userNameAndPassword);
 
         $response = curl_exec($ch);
+
         $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if($response === false)
@@ -93,7 +94,7 @@ class OpenPayU_HttpCurl implements OpenPayU_HttpProtocol
     {
         foreach($headers as $name => $value)
         {
-            if(preg_match('/X-OpenPayU-Signature/i', $name))
+            if(preg_match('/X-OpenPayU-Signature/i', $name) || preg_match('/OpenPayu-Signature/i', $name))
                 return $value;
         }
     }

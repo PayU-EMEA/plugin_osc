@@ -26,22 +26,21 @@ class payu_account
     {
         global $order, $language;
 
-        $this->signature = 'payu|payu_account|1.1.0|2.3.1';
+        $this->signature = 'payu|payu_account|1.2.0|2.3.1';
 
         $this->code = 'payu_account';
         $this->title = MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_TITLE;
         $this->public_title = MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_PUBLIC_TITLE;
-        $this->description = payu_version('1.1.0', '');
+        $this->description = payu_version('1.2.0', '');
         $this->sort_order = MODULE_PAYMENT_PAYU_ACCOUNT_SORT_ORDER;
 
         $this->enabled = ((MODULE_PAYMENT_PAYU_ACCOUNT_STATUS == 'Yes') ? TRUE : FALSE);
         $this->show_in_cart = ((MODULE_PAYMENT_PAYU_ACCOUNT_SHOW_IN_CART == 'Yes') ? TRUE : FALSE);
 
-        OpenPayU_Configuration::setApiVersion(2);
         OpenPayU_Configuration::setEnvironment('secure');
         OpenPayU_Configuration::setMerchantPosId(MODULE_PAYMENT_PAYU_ACCOUNT_POS_ID);
         OpenPayU_Configuration::setSignatureKey(MODULE_PAYMENT_PAYU_ACCOUNT_SIGN_KEY);
-        OpenPayU_Configuration::setSender("OsCommerce ver " . "/Plugin ver " . $this->description);
+        OpenPayU_Configuration::setSender("OsCommerce ver " . "/Plugin ver 2.1.1");
 
         if ((int)MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID > 0) {
             $this->order_status = MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID;
@@ -56,13 +55,10 @@ class payu_account
         return array(
             'MODULE_PAYMENT_PAYU_ACCOUNT_VERSION',
             'MODULE_PAYMENT_PAYU_ACCOUNT_STATUS',
-            //'MODULE_PAYMENT_PAYU_ACCOUNT_ENVIRONMENT',
             'MODULE_PAYMENT_PAYU_ACCOUNT_SHOW_IN_CART',
 
             'MODULE_PAYMENT_PAYU_ACCOUNT_POS_ID',
-            //'MODULE_PAYMENT_PAYU_ACCOUNT_CLIENT_SECRET',
             'MODULE_PAYMENT_PAYU_ACCOUNT_SIGN_KEY',
-            //'MODULE_PAYMENT_PAYU_ACCOUNT_POS_AUTH_KEY',
 
             'MODULE_PAYMENT_PAYU_ACCOUNT_TRANSACTIONS_ORDER_STATUS_ID',
             'MODULE_PAYMENT_PAYU_ACCOUNT_ZONE',
@@ -124,10 +120,7 @@ class payu_account
 
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable payments with PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_STATUS', 'No', 'Do you want to accept payments with PayU Account?', '6', '1', 'tep_cfg_select_option(array(\'Yes\', \'No\'), ', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Point of sale id number (POS ID)', 'MODULE_PAYMENT_PAYU_ACCOUNT_POS_ID', '', 'OAuth protocol - client_id', '6', '0', now())");
-        //tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Point of sale authorization key (pos_auth_key)', 'MODULE_PAYMENT_PAYU_ACCOUNT_POS_AUTH_KEY', '', '', '6', '0', now())");
-        //tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Key (MD5)', 'MODULE_PAYMENT_PAYU_ACCOUNT_CLIENT_SECRET', '', 'OAuth protocol  - client_secret', '6', '0', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Second key (MD5)', 'MODULE_PAYMENT_PAYU_ACCOUNT_SIGN_KEY', '', 'Symmetric key to encrypt the comminication', '6', '0', now())");
-        //tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Select the mode of payments with PayU Account', 'MODULE_PAYMENT_PAYU_ACCOUNT_ENVIRONMENT', 'Sandbox', 'Which mode do you want to enable?', '6', '1', 'tep_cfg_select_option(array(\'Sandbox\', \'Live\'), ', now())");
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable PayU in the shopping cart', 'MODULE_PAYMENT_PAYU_ACCOUNT_SHOW_IN_CART', 'Yes', 'Do you want to enable PayU in the shopping cart?', '6', '1', 'tep_cfg_select_option(array(\'Yes\', \'No\'), ', now())");
 
         tep_db_query("INSERT INTO " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, use_function, set_function, date_added) values ('Payment Zone', 'MODULE_PAYMENT_PAYU_ACCOUNT_ZONE', '0', 'If a zone is selected, only enable this payment method for that zone.', '6', '2', 'tep_get_zone_class_title', 'tep_cfg_pull_down_zone_classes(', now())");
@@ -182,6 +175,7 @@ class payu_account
         $this->order = $order;
         
         $payu_session_created = $this->create_order();
+        
 
         if (empty($payu_session_created['session_id'])) {
             tep_redirect(tep_href_link(FILENAME_SHOPPING_CART, 'error_message=' . MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_ERROR_IN_CREATING_ORDER));
@@ -194,6 +188,7 @@ class payu_account
         $payu_session['session_id'] = $payu_session_created['session_id'];
         $payu_session['redirect_uri'] = $payu_session_created['redirect_uri'];
         $payu_session['shopping_cart'] = ($this->order->info['cart_flow']) ? 1 : 0;
+        
         if (!tep_session_is_registered('payu_session')) {
             tep_session_register('payu_session');
         }
@@ -206,7 +201,7 @@ class payu_account
         $res = tep_db_query("INSERT INTO orders_payu (orders_id, payu_session_id, shopping_cart) VALUES('{$insert_id}', '" . $payu_session['session_id'] . "', '" . $payu_session['shopping_cart'] . "')");
 
         echo '<script>window.location = "'.$payu_session['redirect_uri'].'";</script>';
-        
+        exit;
         //header('Location: ' . $payu_session['redirect_uri']);
         //header('Location: ' . OpenPayu_Configuration::getSummaryUrl() . '?sessionId=' . $payu_session['session_id'] . '&lang=' . strtolower($language['code']) . '&oauth_token=' . $result->getAccessToken());
     }
@@ -425,13 +420,18 @@ class payu_account
             'customerIp' => $this->get_ip(),
             'notifyUrl' => tep_href_link('ext/modules/payment/payu/notify.php'),
             'cancelUrl' => tep_href_link('ext/modules/payment/payu/cancel.php'),
-            'completeUrl' => tep_href_link('ext/modules/payment/payu/complete.php'),
+//            'completeUrl' => tep_href_link('ext/modules/payment/payu/complete.php'),
+            'continueUrl' => tep_href_link('ext/modules/payment/payu/complete.php'),
         	'validityTime' => ((int)MODULE_PAYMENT_PAYU_ACCOUNT_ORDER_VALIDITY_TIME > 0) ? (int)MODULE_PAYMENT_PAYU_ACCOUNT_ORDER_VALIDITY_TIME : 60,
         	'description' => (trim($this->order->info['comments']) ? $this->order->info['comments'] : MODULE_PAYMENT_PAYU_ACCOUNT_TEXT_NO_DESCRIPTION),
-        	'totalAmount' => $this->total_price['totalAmount'],
+        	'totalAmount' => round(
+        			$this->order->info['total']*100
+        			- $this->order->info['shipping_cost']*100),
         	'extOrderId' => (int)$this->orders_id,
-        	'products' => $shopping_cart
+        	'products' => $shopping_cart['products']
         );
+        
+        //print_r($this);
 
         #prepare customer data
         $customer = $this->get_customer_data();
@@ -442,8 +442,10 @@ class payu_account
         #prepare shipping cost list
         $shipping_cost = $this->get_shipping_list();
         if (!empty($shipping_cost)) {
-            $order['shippingMethods'] = $shipping_cost;
+            $order['shippingMethods'] = $shipping_cost['shippingMethods'];
         }
+        
+        //print_r($order);
         
         #create order in PayU system, return response
         $result = OpenPayU_Order::create($order);
@@ -496,6 +498,18 @@ class payu_account
         }
 
         return null;
+    }
+    
+    function get_session_id_by_order_id($order_id)
+    {
+    	$query = tep_db_query('SELECT payu_session_id FROM orders_payu WHERE orders_id="' . $order_id . '"');
+    	$order_query = tep_db_fetch_array($query);
+    
+    	if ($order_query['payu_session_id']) {
+    		return $order_query['payu_session_id'];
+    	}
+    
+    	return null;
     }
 
     /**

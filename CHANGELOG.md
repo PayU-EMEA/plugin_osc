@@ -1,3 +1,7 @@
+## 2.1.1
+
+* API 2.1 compatible
+
 ## 2.0.1
 
 * SDK v2 compatible

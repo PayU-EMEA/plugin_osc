@@ -9,9 +9,6 @@
     http://www.payu.com
 */
 
-error_reporting(0);
-ini_set('errors_display', 0);
-
 chdir('../../../../');
 require_once 'includes/application_top.php';
 

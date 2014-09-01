@@ -16,9 +16,9 @@ class OpenPayU_Http
         //$signature = OpenPayU_Util::generateSignData($data, OpenPayU_Configuration::getHashAlgorithm(), OpenPayU_Configuration::getMerchantPosId(), OpenPayU_Configuration::getSignatureKey());
 
         $posId = OpenPayU_Configuration::getMerchantPosId();
-        $sigantureKey = OpenPayU_Configuration::getSignatureKey();
+        $signatureKey = OpenPayU_Configuration::getSignatureKey();
 
-        $response = OpenPayU_HttpCurl::doRequest('POST', $pathUrl, $data, $posId, $sigantureKey);
+        $response = OpenPayU_HttpCurl::doRequest('POST', $pathUrl, $data, $posId, $signatureKey);
 
         return $response;
     }
@@ -28,9 +28,9 @@ class OpenPayU_Http
         //$signature = OpenPayU_Util::generateSignData($data, OpenPayU_Configuration::getHashAlgorithm(), OpenPayU_Configuration::getMerchantPosId(), OpenPayU_Configuration::getSignatureKey());
 
         $posId = OpenPayU_Configuration::getMerchantPosId();
-        $sigantureKey = OpenPayU_Configuration::getSignatureKey();
+        $signatureKey = OpenPayU_Configuration::getSignatureKey();
 
-        $response = OpenPayU_HttpCurl::doRequest('POST', $pathUrl, $data, $posId, $sigantureKey);
+        $response = OpenPayU_HttpCurl::doRequest('POST', $pathUrl, $data, $posId, $signatureKey);
 
         return $response;
     }
@@ -99,15 +99,15 @@ class OpenPayU_Http
                 break;
 
             case 400:
-                throw new OpenPayU_Exception(trim($message->Status->StatusCode . (isset($message->Status->StatusDesc) ?
-                    ' - ' . $message->Status->StatusDesc : '')), $statusCode);
+                throw new OpenPayU_Exception(trim($message->status->statusCode . (isset($message->status->statusDesc) ?
+                    ' - ' . $message->Status->statusDesc : '')), $statusCode);
                 break;
             case 403:
-                throw new OpenPayU_Exception_Authorization(trim($message->Status->StatusCode), $statusCode);
+                throw new OpenPayU_Exception_Authorization(trim($message->status->statusCode), $statusCode);
                 break;
 
             case 404:
-                throw new OpenPayU_Exception_Network('The end point of the url not found');
+                throw new OpenPayU_Exception_Network('Data indicated in the request is not available in the PayU system.');
                 break;
 
             case 408:
@@ -115,8 +115,10 @@ class OpenPayU_Http
                 break;
 
             case 500:
-                throw new OpenPayU_Exception_ServerError('Server Error: [' . (isset($message->Status->StatusDesc) ?
-                    $message->Status->StatusDesc : '') . ']', $statusCode);
+                throw new OpenPayU_Exception_ServerError('PayU system is unavailable or your order is not processed.
+                Error:
+                [' . (isset($message->status->statusDesc) ?
+                    $message->status->statusDesc : '') . ']', $statusCode);
                 break;
 
             case 503:
