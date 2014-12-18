@@ -1,5 +1,9 @@
 # PayU account plugin for osCommerce
 -------
+Dear User, 
+On December 19, 2014 we stop developing and supporting osCommerce plugin. Nevertheless, feel free to create pull requests we will gladly accept.
+
+
 PayU account is a web application designed as an e-wallet for shoppers willing to open an account, define their payment options, see their purchase history and manage personal profiles.
 
 ##Features
